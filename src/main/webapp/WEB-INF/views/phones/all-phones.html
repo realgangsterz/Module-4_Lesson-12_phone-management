@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>List Smartphone</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        //document là đọc sụ kiện. Ready setup tất cả những gì cần thiết trước khi bấm nút xóa
+        $(document).ready(function () {
+            var deleteLink = $("a:contains('Delete')");
+            // 'tên title' để đọc sự kiện (thay đổi action của thẻ a từ get sang post)
+
+            //biến đúng -> click, xảy ra sự kiện
+            $(deleteLink).click(function (event) {
+                $.ajax({
+                    //set up đường link
+                    url: $(event.target).attr("href"),
+                    // setup phương thức . GỬi ( POST )
+                    type: "POST",
+                    // định dạng ngôn ngữ là json
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Accept", "application/json");
+                        xhr.setRequestHeader("Content-Type", "application/json");
+
+                    },
+                    // Sau khi hoàn thành sự kiện click. Click xong ( ý là khi bấm xong ) thì nó sẽ response ra cái gì >
+                    success: function (smartphone) {
+                        // gửi về chuổi hiển thị
+                        var respContent = "";
+                        // trỏ đến thẻ <tr> để xóa đối tượng
+                        var rowToDelete = $(event.target).closest("tr");
+                        // thực hiện hàm xóa trong view. Hàm remove() trong thư viện
+                        rowToDelete.remove();
+                        //Thực hiện cộng chuỗi để hiển thị
+                        respContent += "<span class='success'>Smartphone was deleted: [";
+                        respContent += smartphone.producer + " : ";
+                        respContent += smartphone.model + " : ";
+                        respContent += smartphone.price + "]</span>";
+                        // hiển thị chuỗi vừa cộng ở trên ( ghi đè nội dung vào thẻ đã có )
+                        //"#..." cái này là id của thẻ
+                        $("#sPhoneFromResponse").html(respContent);
+                    }
+                });
+                event.preventDefault();
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="container">
+    <h1>All Smartphones</h1>
+    <a th:href="@{/smartphones/create}">Create</a>
+    <div>
+        <p>Here you can see a list of Smartphones:</p>
+        <div id="sPhoneFromResponse"></div>
+    </div>
+    <table border="1px" cellpadding="0" cellspacing="0">
+        <thead>
+        <tr>
+            <th>Producer</th>
+            <th>Model</th>
+            <th>Price</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <th:block th:each="phone : ${allphones}">
+            <tr>
+                <td th:text="${phone.producer}"></td>
+                <td th:text="${phone.model}"></td>
+                <td th:text="${phone.price}"></td>
+                <td>
+                    <a th:href="@{/smartphones/edit/__${phone.id}__}">Edit</a><br/>
+                    <a th:href="@{/smartphones/delete/__${phone.id}__}">Delete</a><br/>
+                </td>
+            </tr>
+        </th:block>
+        </tbody>
+    </table>
+    <a th:href="@{/}">Home page</a>
+</div>
+</body>
+</html>
